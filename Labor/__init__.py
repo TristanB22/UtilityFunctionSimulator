@@ -1,0 +1,1 @@
+from .labor import Labor

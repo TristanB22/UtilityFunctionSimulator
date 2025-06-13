@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Component Graph</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+    #cy {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      background: linear-gradient(120deg, #0f2027 0%, #2c5364 100%);
+    }
+  </style>
+</head>
+<body>
+  <div id="cy"></div>
+
+  <script src="https://unpkg.com/cytoscape@3.24.0/dist/cytoscape.min.js"></script>
+  <script>
+    const cy = cytoscape({
+      container: document.getElementById('cy'),
+      boxSelectionEnabled: false,
+      autounselectify: true,
+
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'label': 'data(label)',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'background-color': 'data(color)',
+            'width': 'data(size)',
+            'height': 'data(size)',
+            'border-width': 2,
+            'border-color': '#6366f1',
+            'font-size': 14,
+            'font-weight': '600',
+            'color': '#22223b',
+            'text-outline-width': 1,
+            'text-outline-color': '#ffffff'
+          }
+        },
+        {
+          selector: 'edge',
+          style: {
+            'curve-style': 'straight',
+            'target-arrow-shape': 'triangle',
+            'target-arrow-color': '#4f46e5',
+            'line-color': '#c7d2fe',
+            'width': 2,
+            'label': 'data(label)',
+            'font-size': 10,
+            'font-weight': '500',
+            'text-background-color': '#ffffff',
+            'text-background-opacity': 0.8,
+            'text-background-padding': 3,
+            'text-background-shape': 'roundrectangle'
+          }
+        },
+        {
+          selector: ':selected',
+          style: {
+            'background-color': '#FFA500',
+            'line-color': '#FFA500',
+            'target-arrow-color': '#FFA500',
+            'source-arrow-color': '#FFA500'
+          }
+        }
+      ],
+
+      elements: [
+        // Compound “module” containing Agent & Firm
+        { data: { id: 'module1', label: 'Module: Firm internals', size: 100, color: '#dbeafe' } },
+        { data: { id: 'Agent', parent: 'module1', label: 'Agent', size: 80, color: '#f8fafc' } },
+        { data: { id: 'Firm',  parent: 'module1', label: 'Firm',  size: 80, color: '#f1f5f9' } },
+        // Independent node
+        { data: { id: 'OrgChart', label: 'Organization Chart', size: 80, color: '#e2e8f0' } },
+
+        // Edges
+        { data: { id: 'e1', source: 'Agent',    target: 'Firm',     label: 'works in' } },
+        { data: { id: 'e2', source: 'Firm',     target: 'OrgChart', label: 'has attribute' } },
+        { data: { id: 'e3', source: 'Agent',    target: 'OrgChart', label: 'is found in' } }
+      ],
+
+      layout: {
+        name: 'cose',
+        animate: true,
+        randomize: false,
+        gravity: 1
+      }
+    });
+
+    // Clicking the module node collapses/expands its children
+    cy.on('tap', 'node[parent]', evt => {
+      const node     = evt.target;
+      const children = cy.nodes().filter(n => n.data('parent') === node.id());
+
+      if (node.data('collapsed')) {
+        node.data('collapsed', false);
+        children.restore();
+      } else {
+        node.data('collapsed', true);
+        children.remove();
+      }
+    });
+  </script>
+</body>
+</html>
